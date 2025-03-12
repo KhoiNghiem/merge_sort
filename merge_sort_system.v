@@ -2,12 +2,12 @@
 module merge_sort_system (
 input                        clk,
 input                        rst,
-
+input                        BlkIn,
 input      signed [7:0]      In1, In2, In3, In4,
 output reg signed [7:0]      SortOut,
 output reg                   OutValid
 );
-wire                   BlkIn;
+
 wire                   group_done_tmp;
 wire signed [7:0]      max, second_max, min, second_min;
 
@@ -50,7 +50,6 @@ always @(posedge clk or negedge rst) begin
     end
 end
 
-assign BlkIn = (!count); 
 
 always @(posedge clk or negedge rst) begin
 // Cập nhật block ở mỗi sườn âm clk vì In1-In4 cũng vậy
@@ -64,7 +63,6 @@ always @(posedge clk or negedge rst) begin
         block[6][0] <= 0; block[6][1] <= 0; block[6][2] <= 0; block[6][3] <= 0;
         block[7][0] <= 0; block[7][1] <= 0; block[7][2] <= 0; block[7][3] <= 0;
     end
-
     else begin
         block[count][0] <= max;
         block[count][1] <= second_max;

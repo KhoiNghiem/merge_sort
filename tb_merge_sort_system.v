@@ -6,6 +6,7 @@ module tb_merge_sort_system;
     reg signed [7:0] In1, In2, In3, In4;
     wire signed [7:0] SortOut;
     wire OutValid;
+    reg BlkIn;
 
     // Các tín hiệu từ sort4 để theo dõi
     wire signed [7:0] max, second_max, min, second_min;
@@ -13,7 +14,8 @@ module tb_merge_sort_system;
     // Khởi tạo module merge_sort_system
     merge_sort_system uut (
         .clk(clk),
-        .rst(rst),         // Kết nối tín hiệu BlkIn vào module merge_sort_system
+        .rst(rst),
+        .BlkIn(BlkIn),
         .In1(In1),
         .In2(In2),
         .In3(In3),
