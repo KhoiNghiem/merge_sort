@@ -2,7 +2,7 @@ module tb_merge_sort_system;
 
     // Định nghĩa tín hiệu
     reg clk;
-    reg BlkIn = 0;
+    reg rst;
     reg signed [7:0] In1, In2, In3, In4;
     wire signed [7:0] SortOut;
     wire OutValid;
@@ -13,7 +13,7 @@ module tb_merge_sort_system;
     // Khởi tạo module merge_sort_system
     merge_sort_system uut (
         .clk(clk),
-        .BlkIn(BlkIn),         // Kết nối tín hiệu BlkIn vào module merge_sort_system
+        .rst(rst),         // Kết nối tín hiệu BlkIn vào module merge_sort_system
         .In1(In1),
         .In2(In2),
         .In3(In3),
@@ -37,42 +37,26 @@ module tb_merge_sort_system;
 
     // Khởi tạo test
     integer i;
-    reg signed [7:0] random_sequence [0:31]; // Mảng để lưu trữ 32 phần tử ngẫu nhiên
+    
+    initial begin
+        rst = 0;  // Bật reset
+        #20 rst = 1;  // Tắt reset sau một chu kỳ đồng hồ
+    end
 
-    always @(negedge clk)  begin
-        #10
-        // Inital signal states
-        In1 = 0;
-        In2 = 0;
-        In3 = 0;
-        In4 = 0;
+    always @(negedge clk) begin
+        // Tạo các giá trị ngẫu nhiên mới mỗi chu kỳ
+        In1 = $signed($random) % 256 - 128; // Tạo giá trị ngẫu nhiên trong khoảng [-128, 127]
+        In2 = $signed($random) % 256 - 128;
+        In3 = $signed($random) % 256 - 128;
+        In4 = $signed($random) % 256 - 128;
 
-        // Tạo 32 phần tử ngẫu nhiên từ -128 đến 127
-        for (i = 0; i < 32; i = i + 1) begin
-            random_sequence[i] = $signed($random) % 256 - 128; // Tạo giá trị ngẫu nhiên trong khoảng [-128, 127]
-        end
+        // Quá trình truyền vào dữ liệu cho mỗi chu kỳ
+        #10; // 1 chu kỳ x 10 ns (10ns là thời gian mỗi chu kỳ đồng hồ)
+    end
 
-        // Quá trình truyền vào dữ liệu cho 32 phần tử, mỗi chu kỳ 1 giá trị mới
-        for (i = 0; i < 32; i = i + 1) begin
-            // Chuyển giá trị mới vào mỗi chu kỳ
-            In1 = random_sequence[i];
-            In2 = random_sequence[i+1]; // Lưu các giá trị này vào để test
-            In3 = random_sequence[i+2]; // Tương tự
-            In4 = random_sequence[i+3]; // Tương tự
-
-            // Bật BlkIn sau mỗi 8 chu kỳ
-            if (i % 8 == 0) begin
-                BlkIn = 1;
-            end else begin
-                BlkIn = 0;
-            end
-
-            // Chờ 1 chu kỳ đồng hồ (tương ứng với 1 dữ liệu vào mỗi chu kỳ)
-            #10; // 1 chu kỳ x 10 ns (10ns là thời gian mỗi chu kỳ đồng hồ)
-        end
-
-        // Chờ đủ thời gian để quá trình merge hoàn thành
-        #200;
+    // Chờ đủ thời gian để quá trình merge hoàn thành
+    initial begin
+        #200;  // Chờ 200ns (hoặc thời gian cần thiết để sắp xếp hoàn tất)
         $finish; // Kết thúc mô phỏng
     end
 
