@@ -8,16 +8,16 @@ output reg signed [7:0]      SortOut,
 output reg                   OutValid
 );
 
-wire                   group_done_tmp;
+reg                   group_done_tmp;
 wire signed [7:0]      max, second_max, min, second_min;
 
 reg [3:0] max_index_0, max_index_1, max_index_2, max_index_3;
 reg [3:0] max_index_4, max_index_5, max_index_6, max_index_7;
 
-reg  signed [7:0] block [0:7][0:3]; // Nơi lưu input data
+reg  signed [7:0] block [0:7][0:3];
 reg signed [7:0] block_buffer [0:7][0:3];
 
-reg         [2:0]      count; // Số không dấu để đếm từ 0 đến 7
+reg         [2:0]      count;
 
 reg  group_done;
 
@@ -42,7 +42,7 @@ always @(posedge clk or negedge rst) begin
         group_done <= 0;
     end
     else begin 
-        if (count + 1 >= 8) begin
+        if (count  == 7) begin
             group_done <= 1;
         end else begin
             
@@ -51,7 +51,7 @@ always @(posedge clk or negedge rst) begin
 end
 
 
-always @(posedge clk or negedge rst) begin
+always @(negedge clk or negedge rst) begin
 // Cập nhật block ở mỗi sườn âm clk vì In1-In4 cũng vậy
     if(~rst) begin
         block[0][0] <= 0; block[0][1] <= 0; block[0][2] <= 0; block[0][3] <= 0;
@@ -71,9 +71,17 @@ always @(posedge clk or negedge rst) begin
     end
     end
 
-assign group_done_tmp = (count == 7);
+always @(negedge clk) begin
+    if (!rst) begin
+        group_done_tmp <= 0;
+    end else begin
+        group_done_tmp = (count == 7);
+    end
+end
 
-always @(negedge clk or negedge rst) begin
+// assign group_done_tmp = (count == 7);
+
+always @(posedge clk or negedge rst) begin
     if (~rst) begin
         
     end
