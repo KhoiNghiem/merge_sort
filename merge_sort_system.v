@@ -8,7 +8,6 @@ output reg signed [7:0]      SortOut,
 output reg                   OutValid
 );
 
-reg                   group_done_tmp;
 wire signed [7:0]      max, second_max, min, second_min;
 
 reg [3:0] max_index_0, max_index_1, max_index_2, max_index_3;
@@ -19,7 +18,7 @@ reg signed [7:0] block_buffer [0:7][0:3];
 
 reg         [2:0]      count;
 
-reg  group_done;
+reg  first_group_done;
 
 sort4 sort_inst (
 .x1(In1), .x2(In2), .x3(In3), .x4(In4),
@@ -39,20 +38,15 @@ end
 
 always @(posedge clk or negedge rst) begin
     if(~rst) begin
-        group_done <= 0;
+        first_group_done <= 0;
     end
-    else begin 
-        if (count  == 7) begin
-            group_done <= 1;
-        end else begin
-            
-        end
-    end
+    else if (BlkIn) begin
+            first_group_done <= 1;
+    end 
 end
 
 
 always @(negedge clk or negedge rst) begin
-// Cập nhật block ở mỗi sườn âm clk vì In1-In4 cũng vậy
     if(~rst) begin
         block[0][0] <= 0; block[0][1] <= 0; block[0][2] <= 0; block[0][3] <= 0;
         block[1][0] <= 0; block[1][1] <= 0; block[1][2] <= 0; block[1][3] <= 0;
@@ -71,21 +65,19 @@ always @(negedge clk or negedge rst) begin
     end
     end
 
-always @(negedge clk) begin
-    if (!rst) begin
-        group_done_tmp <= 0;
-    end else begin
-        group_done_tmp = (count == 7);
-    end
-end
-
-// assign group_done_tmp = (count == 7);
 
 always @(posedge clk or negedge rst) begin
     if (~rst) begin
-        
+        block_buffer[0][0] <= 0; block_buffer[0][1] <= 0; block_buffer[0][2] <= 0; block_buffer[0][3] <= 0;
+        block_buffer[1][0] <= 0; block_buffer[1][1] <= 0; block_buffer[1][2] <= 0; block_buffer[1][3] <= 0;
+        block_buffer[2][0] <= 0; block_buffer[2][1] <= 0; block_buffer[2][2] <= 0; block_buffer[2][3] <= 0;
+        block_buffer[3][0] <= 0; block_buffer[3][1] <= 0; block_buffer[3][2] <= 0; block_buffer[3][3] <= 0;
+        block_buffer[4][0] <= 0; block_buffer[4][1] <= 0; block_buffer[4][2] <= 0; block_buffer[4][3] <= 0;
+        block_buffer[5][0] <= 0; block_buffer[5][1] <= 0; block_buffer[5][2] <= 0; block_buffer[5][3] <= 0;
+        block_buffer[6][0] <= 0; block_buffer[6][1] <= 0; block_buffer[6][2] <= 0; block_buffer[6][3] <= 0;
+        block_buffer[7][0] <= 0; block_buffer[7][1] <= 0; block_buffer[7][2] <= 0; block_buffer[7][3] <= 0;
     end
-    else if (group_done_tmp) begin
+    else if (BlkIn) begin
         // Lưu vào block_buffer từng phần tử
         block_buffer[0][0] <= block[0][0];
         block_buffer[0][1] <= block[0][1];
@@ -127,9 +119,7 @@ always @(posedge clk or negedge rst) begin
         block_buffer[7][2] <= block[7][2];
         block_buffer[7][3] <= block[7][3];
     end
-    else begin
-        
-    end
+    
 end
 
 always @(posedge clk or negedge rst) begin
@@ -143,10 +133,10 @@ if(~rst) begin
     max_index_5 <= 0;
     max_index_6 <= 0;
     max_index_7 <= 0;
-    SortOut <= 0;
+    // SortOut <= 0;
     OutValid <= 0;
 end
-else if (group_done) begin
+else if (first_group_done) begin
     OutValid <= 1'b1;
     if (count - 1 <= 7) begin
     // Tìm giá trị lớn nhất từ các phần tử

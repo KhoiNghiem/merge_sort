@@ -42,7 +42,7 @@ module tb_merge_sort_system;
     
     initial begin
         rst = 0;  // Bật reset
-        #20 rst = 1;  // Tắt reset sau một chu kỳ đồng hồ
+        #10 rst = 1;  // Tắt reset sau một chu kỳ đồng hồ
     end
 
     always @(negedge clk) begin
@@ -58,8 +58,24 @@ module tb_merge_sort_system;
 
     // Chờ đủ thời gian để quá trình merge hoàn thành
     initial begin
-        #200;  // Chờ 200ns (hoặc thời gian cần thiết để sắp xếp hoàn tất)
+        #2000;  // Chờ 200ns (hoặc thời gian cần thiết để sắp xếp hoàn tất)
         $finish; // Kết thúc mô phỏng
+    end
+
+    initial begin
+        #10
+        BlkIn = 1;  // Bật reset
+        #10 BlkIn = 0;  // Tắt reset sau một chu kỳ đồng hồ
+    end
+
+    always @(negedge clk or negedge rst) begin
+            if (i < 7) begin
+                i = i + 1;
+                BlkIn = 0;
+            end else begin
+                BlkIn = 1;
+                i = 0;
+            end
     end
 
     // In các kết quả khi OutValid bật lên
